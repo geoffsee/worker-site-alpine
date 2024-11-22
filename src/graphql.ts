@@ -1,15 +1,16 @@
 import {createSchema} from "graphql-yoga";
+import {getRandomSweetNothing} from "./service";
 
 export function buildSchemaForRequest<T>() {
     const schema = createSchema<T>({
-        typeDefs: /* GraphQL */ `
+        typeDefs: `
     type Query {
-      hello: String
+      whisperSweetNothing: String
     }
   `,
         resolvers: {
             Query: {
-                hello: () => 'world'
+                whisperSweetNothing: () => getRandomSweetNothing()
             }
         }
     });

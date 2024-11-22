@@ -1,77 +1,191 @@
-# README
+# worker-site-alpine
 
-## Lightweight Full-Stack Starter Template
+> A lightweight full-stack starter template featuring Alpine.js, Tailwind CSS, and GraphQL Yoga on Cloudflare Workers.
 
-This repository provides a lightweight full-stack starter template using Alpine.js, Tailwind CSS, and Hono with GraphQL Yoga, all deployed on Cloudflare Workers. This stack ensures lightning-fast, globally distributed responses.
+![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
+![Cloudflare Workers](https://img.shields.io/badge/cloudflare-workers-orange)
+![Alpine.js](https://img.shields.io/badge/Alpine.js-latest-blue)
 
-### Features
-- **Frontend**: Alpine.js for reactivity and Tailwind CSS for styling.
-- **Backend**: Hono framework with GraphQL Yoga.
-- **Cloudflare Workers**: Serverless, fast, and globally distributed.
+## Overview
 
-### Prerequisites
-- npm or yarn
-- Cloudflare account
+`worker-site-alpine` is a modern full-stack template that demonstrates the integration of Alpine.js reactivity with GraphQL on Cloudflare's edge network. It showcases a whimsical "sweet nothings" generator while providing a foundation for building performant, globally distributed web applications. 
 
-### Installation
-1. **Clone the repository:**
-    ```sh
-    git clone https://github.com/geoffsee/fullstack-starter-template.git
-    cd fullstack-starter-template
-    ```
+### Key Features
 
-2. **Install dependencies:**
-    ```sh
-    npm install
-    ```
-   or
-    ```sh
-    yarn install
-    ```
+- **Edge Computing**: Leverage Cloudflare Workers for globally distributed deployment
+- **GraphQL Integration**: Built-in GraphQL Yoga implementation with itty-router
+- **Modern Frontend**: Alpine.js reactivity with Tailwind CSS styling
+- **Asset Handling**: Built-in static asset serving capabilities
+- **TypeScript Support**: Full TypeScript support across the stack
+- **Developer Experience**: Hot reload and easy deployment workflow
 
-3. **Configure Cloudflare Workers:**
-    - Ensure you have `wrangler` installed and configured. Follow the Cloudflare Workers documentation: [Cloudflare Workers Documentation](https://developers.cloudflare.com/workers/)
+### _Try it_
 
-### Usage
-1. **Run the Development Server:**
-    ```sh
-    npm run dev
-    ```
-   or
-    ```sh
-    yarn dev
-    ```
-   Access the app at `http://localhost:8787`.
-
-### Folder Structure
+```bash
+npx wrangler@latest init my-app --template https://github.com/geoffsee/worker-site-alpine
 ```
-.
-├── public
-│   ├── favicon.ico
-│   └── index.html
-├── src
-│   ├── graphql.ts
-│   └── index.ts
-├── package.json
-├── tsconfig.json
-├── wrangler.toml
-└── README.md
+## Installation
+
+```bash
+npm install
 ```
 
-### Deployment
-1. **Build the Project:**
-    ```sh
-    npm run build
-    ```
-   or
-    ```sh
-    yarn build
-    ```
+Or using Yarn:
 
-2. **Deploy to Cloudflare Workers:**
-    ```sh
-    wrangler publish
-    ```
+```bash
+yarn install
+```
 
-### License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+## Quick Start
+
+```typescript
+import { createYoga } from 'graphql-yoga';
+import { IttyRouter } from 'itty-router';
+import { buildSchemaForRequest } from './graphql';
+
+const api = IttyRouter();
+api.all('/api/v1/graphql', async (request, env, ctx) => {
+    const schema = buildSchemaForRequest();
+    const yoga = createYoga({
+        schema,
+        graphqlEndpoint: '/api/v1/graphql',
+    });
+    return yoga.handleRequest(request, env);
+});
+```
+
+## Core Components
+
+### GraphQL Schema
+
+The GraphQL layer provides a simple, extensible API for data operations.
+
+```typescript
+export function buildSchemaForRequest() {
+    return createSchema({
+        typeDefs: `
+            type Query {
+                whisperSweetNothing: String
+            }
+        `,
+        resolvers: {
+            Query: {
+                whisperSweetNothing: () => getRandomSweetNothing()
+            }
+        }
+    });
+}
+```
+
+### Frontend Integration
+
+Alpine.js handles frontend reactivity with minimal overhead.
+
+```html
+<div x-data="appData()">
+    <button
+        @click="fetchSweetNothing"
+        class="px-4 py-2 bg-[#164e63] text-white rounded">
+        whisper sweet nothings
+    </button>
+    <p x-text="sweetNothing"></p>
+</div>
+```
+
+### Routing
+
+itty-router provides lightweight routing with Cloudflare Workers compatibility.
+
+```typescript
+api.get('*', async (request, env, ctx) => {
+    try {
+        return env.ASSETS.fetch(request);
+    } catch (error) {
+        return new Response('Asset not found', { status: 404 });
+    }
+});
+```
+
+## Complete Example
+
+Here's a comprehensive example demonstrating the full stack:
+
+```typescript
+// Frontend (Alpine.js)
+function appData() {
+    return {
+        sweetNothing: '',
+        async fetchSweetNothing() {
+            const response = await fetch('/api/v1/graphql', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    query: `{ whisperSweetNothing }`
+                }),
+            });
+            const result = await response.json();
+            this.sweetNothing = `"${result.data.whisperSweetNothing}"`;
+        }
+    }
+}
+
+// Backend (GraphQL + Workers)
+interface Env {
+    ASSETS: Fetcher;
+}
+
+const api = IttyRouter();
+api.all('/api/v1/graphql', async (request, env, ctx) => {
+    const schema = buildSchemaForRequest<Env & ExecutionContext>();
+    const yoga = createYoga<Env>({
+        schema,
+        graphqlEndpoint: '/api/v1/graphql',
+    });
+    return yoga.handleRequest(request, env);
+});
+
+export default api;
+```
+
+## Asset Handling
+
+The template includes built-in asset handling through Cloudflare Workers:
+
+```typescript
+api.get('*', async (request, env, ctx) => {
+    try {
+        return env.ASSETS.fetch(request);
+    } catch (error) {
+        return new Response('Asset not found', { status: 404 });
+    }
+});
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/my-feature`
+3. Commit your changes: `git commit -m 'Add my feature'`
+4. Push to the branch: `git push origin feature/my-feature`
+5. Submit a pull request
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Run development mode
+npm run dev
+
+# Deploy to Cloudflare Workers
+npm run deploy
+
+# Format code
+npm run format
+```
+
+## License
+MIT © 2024 Geoff Seemueller

@@ -1,59 +1,33 @@
-import {Hono} from 'hono';
-import {serveStatic} from 'hono/cloudflare-workers';
 import {createYoga} from 'graphql-yoga';
-
-// @ts-ignore | @manifest | This variable is only available at build/run time
-import manifest from '__STATIC_CONTENT_MANIFEST';
+import {IttyRouter} from 'itty-router'
 import {buildSchemaForRequest} from "./graphql";
 
-/**
- * Interface representing the bindings for the KVNamespace and other potential bindings.
- */
-interface Bindings extends Record<string, any> {
-    STORAGE: KVNamespace;
+interface Env {
+    ASSETS: Fetcher;
 }
 
-const api = new Hono<{ Bindings: Bindings }>();
+const api = IttyRouter();
 
-/**
- * Serves static files from the root directory.
- *
- * @param {Context} ctx - The context object.
- */
-api.get('/', serveStatic({root: './', manifest}));
+// data api
+api.all('/api/v1/graphql', async (request, env, ctx) => {
+    const schema = buildSchemaForRequest<Env & ExecutionContext>();
 
-/**
- * Serves static files from the 'static' directory.
- *
- * @param {Context} ctx - The context object.
- */
-api.get('/static/*', serveStatic({root: './', manifest}));
-
-/**
- * Serves the favicon.ico file.
- *
- * @param {Context} ctx - The context object.
- */
-api.get('/favicon.ico', serveStatic({path: './favicon.ico', manifest}));
-
-/**
- * Middleware for handling GraphQL requests.
- *
- * @param {Context} ctx - The context object.
- * @returns {Promise<Response>} - The response from the GraphQL Yoga handler.
- */
-api.use('/api/v1/graphql', async (ctx) => {
-    // Build the schema for the incoming request
-    const schema = buildSchemaForRequest<Bindings & ExecutionContext>();
-
-    // Create a new instance of Yoga GraphQL server
-    const yoga = createYoga<Bindings>({
+    const yoga = createYoga<Env>({
         schema,
         graphqlEndpoint: '/api/v1/graphql', // GraphQL endpoint
     });
 
-    // Handle the request using Yoga GraphQL handler
-    return yoga.handleRequest(ctx.req.raw, ctx.env);
+    return yoga.handleRequest(request, env);
+});
+
+// handles static assets
+api.get('*', async (request, env, ctx) => {
+    try {
+        return env.ASSETS.fetch(request);
+    } catch (error) {
+        console.error('Error serving static asset:', error);
+        return new Response('Asset not found', { status: 404 });
+    }
 });
 
 export default api;

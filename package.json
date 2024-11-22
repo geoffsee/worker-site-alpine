@@ -5,12 +5,12 @@
     "deploy": "wrangler deploy --minify src/index.ts"
   },
   "dependencies": {
-    "hono": "^4.4.7",
-    "graphql-yoga":  "^5.4.0",
-    "graphql": "^16.8.2"
+    "graphql": "latest",
+    "graphql-yoga": "latest",
+    "itty-router": "^5.0.18"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20240529.0",
-    "wrangler": "^3.57.2"
+    "@cloudflare/workers-types": "latest",
+    "wrangler": "latest"
   }
 }

@@ -2,73 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Full-Stack Starter Template</title>
+    <title>worker-site-alpine</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-<main class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md" x-data="appData()">
-    <div>
-        <h1 class="text-2xl font-bold mb-4">Full-Stack Starter Template</h1>
-        <p class="italic text-gray-700 mb-6">This template demonstrates a lightweight full-stack app using Alpine.js, Tailwind CSS, and Hono with GraphQL Yoga.</p>
+<body class="bg-black min-h-screen flex flex-col items-center justify-center space-y-6" x-data="appData()">
 
-        <div class="mb-6">
-            <button @click="fetchGreeting" class="bg-blue-500 text-white px-4 py-2 rounded">
-                Fetch Greeting
-            </button>
-            <p class="mt-4 text-gray-700" x-text="greeting"></p>
-        </div>
+<!--LOGO-->
+<div class="w-32 h-32 rounded-full overflow-hidden ring-4 ring-blue-[#164e63] shadow-lg">
+    <img
+            src="/logo.png"
+            alt="worker-site-alpine demo image"
+            class="w-full h-full object-cover"
+    >
+</div>
 
-        <form @submit.prevent="updateSiteAttributes" class="space-y-4">
-            <div>
-                <label for="title" class="block text-sm font-medium text-gray-700">New Site Title</label>
-                <input type="text" id="title" x-model="newTitle" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-            </div>
-            <div>
-                <label for="description" class="block text-sm font-medium text-gray-700">New Site Description</label>
-                <textarea id="description" x-model="newDescription" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
-            </div>
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">
-                Update Site Attributes
-            </button>
-        </form>
-    </div>
-</main>
+<!--HEADER-->
+<h1 class="text-4xl font-bold text-white relative inline-block
+    after:content-['✧'] after:absolute after:top-1/2 after:-right-4 after:text-[#7dd3fc] after:text-sm after:animate-pulse">
+    worker-site-alpine</h1>
+
+<!--TESTER BUTTON-->
+<button
+        @click="fetchSweetNothing"
+        class="px-4 py-2 bg-[#164e63] text-white rounded hover:bg-[#0e7490] transition-colors">
+    whisper sweet nothings
+</button>
+
+<!--FETCHED DATA DISPLAY-->
+<p class="text-white italic" x-text="sweetNothing"></p>
 
 <script>
     function appData() {
         return {
-            siteTitle: 'My Awesome Site',
-            siteDescription: 'This is an awesome website built using Alpine.js and Tailwind CSS.',
-            maintenanceMode: false,
-            greeting: '',
-            newTitle: '',
-            newDescription: '',
-            async fetchGreeting() {
+            sweetNothing: '',
+            async fetchSweetNothing() {
                 const response = await fetch('/api/v1/graphql', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        query: `{ hello }`
+                        query: `{ whisperSweetNothing }`
                     }),
                 });
                 const result = await response.json();
-                this.greeting = result.data.hello;
-            },
-            toggleMaintenance() {
-                this.maintenanceMode = !this.maintenanceMode;
-            },
-            updateSiteAttributes() {
-                if (this.newTitle.trim() !== '') {
-                    this.siteTitle = this.newTitle;
-                }
-                if (this.newDescription.trim() !== '') {
-                    this.siteDescription = this.newDescription;
-                }
-                this.newTitle = '';
-                this.newDescription = '';
+                this.sweetNothing = `"${result.data.whisperSweetNothing}"`;
             }
         }
     }

@@ -7,7 +7,7 @@
   "dependencies": {
     "graphql": "latest",
     "graphql-yoga": "latest",
-    "itty-router": "^5.0.18"
+    "itty-router": "latest"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "latest",

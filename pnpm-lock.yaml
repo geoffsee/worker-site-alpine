@@ -11,11 +11,8 @@ dependencies:
   graphql-yoga:
     specifier: latest
     version: 5.10.3(graphql@16.9.0)
-  hono:
-    specifier: latest
-    version: 4.6.11
   itty-router:
-    specifier: ^5.0.18
+    specifier: latest
     version: 5.0.18
 
 devDependencies:
@@ -683,11 +680,6 @@ packages:
     dependencies:
       function-bind: 1.1.2
     dev: true
-
-  /hono@4.6.11:
-    resolution: {integrity: sha512-f0LwJQFKdUUrCUAVowxSvNCjyzI7ZLt8XWYU/EApyeq5FfOvHFarBaE5rjU9HTNFk4RI0FkdB2edb3p/7xZjzQ==}
-    engines: {node: '>=16.9.0'}
-    dev: false
 
   /is-core-module@2.15.1:
     resolution: {integrity: sha512-z0vtXSwucUJtANQWldhbtbt7BnL0vxiFjIdDLAatwhDYty2bad6s+rijD6Ri4YuYJubLzIJLUidCh09e1djEVQ==}
